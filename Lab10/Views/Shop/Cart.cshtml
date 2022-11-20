@@ -1,0 +1,102 @@
+﻿@model IEnumerable<KeyValuePair<Article, int>>
+
+@{
+    ViewData["Title"] = "Shopping Cart";
+    double totals = 0;
+    string empty = "";
+}
+
+@if (TempData.Peek("ErrorMSG") != null)
+{
+<div class="alert alert-danger alert-dismissible fade show" role="alert">
+    <strong>Your cart has changed!</strong> @TempData["ErrorMSG"]
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+}
+
+
+
+<div class="row align-items-center" style="margin-bottom:25px">
+    <div class="col-md-8"><h1>Shopping cart</h1></div>
+
+    <div class="col-md-4">
+        <a asp-action="Index" class="btn btn-success">Go to shop</a>
+    </div>
+</div>
+
+@if (Model.Count() == 0)
+{
+    empty = "d-none";
+    <div class="text-center" style="color:dimgray;margin:100px">
+        <h3>Your shopping cart is empty</h3>
+        <a asp-action="Index" class="badge badge-info">Go to shop</a>
+    </div>
+}
+
+
+
+<table class="table text-center @empty">
+    <thead class="thead-dark">
+        <tr>
+            <th>
+                Name
+            </th>
+            <th>
+                Photo
+            </th>
+            <th>
+                Amount
+            </th>
+            <th></th>
+            <th>
+                Price
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody class="table-hover font-weight-bolder">
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td class="align-middle">
+                    @Html.DisplayFor(modelItem => item.Key.Name)
+                </td>
+                <td class="align-middle">
+                    @if (item.Key.FileName == "default-product.jpg")
+                    {
+                        <img src="/image/default-product.jpg" width="50px" />
+                    }
+                    else
+                    {
+                        <img src="/upload/@Html.DisplayFor(modelItem => item.Key.FileName)" width="50px" />
+                    }
+                </td>
+                <td class="align-middle">
+                    @item.Value
+                </td>
+                <td class="align-middle">
+                    <a asp-action="AddItem" asp-route-id="@item.Key.ArticleId" class="btn btn-dark btn-circle">+</a>
+                    <a asp-action="RemoveItem" asp-route-id="@item.Key.ArticleId" class="btn btn-dark btn-circle">-</a>
+                </td>
+                <td class="align-middle">
+                    @Html.DisplayFor(modelItem => item.Key.Price)
+                    @{totals += item.Key.Price * item.Value;}
+                </td>
+                <td class="align-middle">
+                    <a asp-action="DeleteFromCart" asp-route-id="@item.Key.ArticleId" class="btn btn-outline-danger">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+    <tfoot class="font-weight-bold">
+        <tr style="font-size:20px;">
+            <th colspan="3"></th>
+            <th scope="row">Totals</th>
+            <th>@totals</th>
+            <th>@Html.ActionLink("Confirm and pay", "Index", "Order", null, new { @class = "btn btn-outline-primary" })</th>
+        </tr>
+    </tfoot>
+</table>
+

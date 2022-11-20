@@ -1,0 +1,128 @@
+﻿@model IEnumerable<KeyValuePair<Article, int>>
+
+@{
+    ViewData["Title"] = "Order confirmation";
+    double totals = 0;
+    string empty = "";
+    foreach(var item in Model)
+    {
+        totals += item.Key.Price * item.Value;
+    }
+}
+
+
+@if (Model.Count() == 0)
+{
+    empty = "d-none";
+<div class="text-center" style="color:dimgray;margin:100px">
+    <h3>Your shopping cart is empty</h3>
+    @Html.ActionLink("Go to shop", "Index", "Shop", null, new { @class = "badge badge-info" })
+</div>
+}
+
+<style>
+    h2 {
+        margin: 50px 0;
+    }
+    .order-tab {
+        padding: 15px;
+        font-size: 12px;
+        box-shadow: 0 0 15px 8px #88888826;
+    }
+    .pers-data {
+        background: #00000008;
+        padding: 20px;
+        height: fit-content;
+    }
+</style>
+
+<div class="@empty row">
+    <div class="col-md-12 d-flex justify-content-between align-items-center">
+        <div><h2>Confirm and pay</h2></div>
+        <div><a asp-controller="Shop" asp-action="Cart" class="btn btn-success">Back to cart</a></div>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" style="width:700px" class="pers-data col-md-8">
+        <div class="d-flex">
+            <div class="form-group">
+                <label for="firstName" class="control-label">First name</label>
+                <input name="firstName" class="form-control" required />
+            </div>
+            <div class="form-group" style="margin-left:15px">
+                <label for="lastName" class="control-label">Last name</label>
+                <input name="lastName" class="form-control" required />
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="address" class="control-label">Enter your shipping address</label>
+            <input name="address" class="form-control" placeholder="Address" required />
+            <div class="d-flex">
+                <input name="zipcode" class="form-control" placeholder="Zipcode" required />
+                <input name="city" class="form-control" placeholder="City" required />
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="payMethod">Pay with</label>
+            <select name="payMethod" class="custom-select" required>
+                <option selected disabled value="">Choose...</option>
+                <option value="1">Credit or debit card</option>
+                <option value="2">Blik</option>
+                <option value="3">Cash on deliery</option>
+            </select>
+        </div>
+        <div style="font-weight:bold; margin:15px 0;">
+            Summury: @totals
+        </div>
+        <div class="form-group">
+            <input type="submit" value="Confirm" class="btn btn-danger" />
+        </div>
+    </form>
+
+    <div class="order-tab col-md-4">
+        <p style="font-size:15px;font-weight:bold;">Your order</p>
+        <table class="table text-center">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Photo</th>
+                    <th>Amount</th>
+                    <th> Price</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td class="align-middle">
+                            @Html.DisplayFor(modelItem => item.Key.Name)
+                        </td>
+                        <td class="align-middle">
+                            @if (item.Key.FileName == "default-product.jpg")
+                            {
+                                <img src="/image/default-product.jpg" width="50px" />
+                            }
+                            else
+                            {
+                                <img src="/upload/@Html.DisplayFor(modelItem => item.Key.FileName)" width="35px" />
+                            }
+                        </td>
+                        <td class="align-middle">
+                            @item.Value
+                        </td>
+                        <td class="align-middle">
+                            @Html.DisplayFor(modelItem => item.Key.Price)
+                        </td>
+                    </tr>
+                }
+            </tbody>
+            <tfoot class="font-weight-bold">
+                <tr style="font-size:16px;">
+                    <th colspan="2"></th>
+                    <th scope="row">Totals</th>
+                    <td>@totals</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+</div>

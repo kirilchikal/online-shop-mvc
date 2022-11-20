@@ -1,0 +1,41 @@
+﻿@model Lab10.Models.Category
+
+@{
+    ViewData["Title"] = "Confirmation";
+}
+
+<style>
+    p {margin-bottom: 5px;}
+    h1 {margin: 50px 0;
+        text-align:center
+    }
+    span {
+        font-weight: 700;
+        color: #000000bb;
+        margin-right: 15px;
+    }
+    a {margin: 35px, 0;}
+    .personal_data {
+        width: 800px;
+        margin: 5px auto;
+        box-shadow: 0 0 15px 5px #8080801a;
+        background: #00000005;
+        padding: 35px;
+        margin-bottom: 50px;
+    }
+</style>
+
+<div>
+    <h1>Your order is complete</h1>
+    <div class="personal_data">
+        <h2>Contact info</h2>
+        <p><span>Name</span>@TempData["firstName"]</p>
+        <p><span>Last Name</span>@TempData["lastName"]</p>
+        <p><span>Email</span>@User.Identity.Name</p>
+        <p><span>Address</span>@TempData["address"]</p>
+        <p><span>Payment method</span>@TempData["payMethod"]</p>
+    </div>
+    <div class="text-center">
+        <a class="btn btn-secondary" asp-controller="Shop" asp-action="Index">Go back to shop</a>
+    </div>
+</div>

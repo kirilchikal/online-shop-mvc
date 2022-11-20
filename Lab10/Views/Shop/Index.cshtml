@@ -1,0 +1,141 @@
+﻿@model ShopViewModel
+
+@{
+    ViewData["Title"] = "Shop page";
+    int isAdmin = Convert.ToInt32(User.IsInRole("Admin"));
+}
+
+<div class="row align-items-center" style="margin:15px">
+    <div class="col-md-8"><h1>Shop</h1></div>
+
+    @if (!User.IsInRole("Admin"))
+    {
+        <div class="col-md-4">
+            <a asp-action="Cart" class="btn btn-success">Go to cart</a>
+        </div>
+    }
+</div>
+
+<form class="form-inline">
+    <label>Choose a category:</label>
+    <select name="categoryId" class="form-control">
+        @foreach (var cat in Model.Categories)
+        {
+            <option value="@cat.CategoryId">@cat.Name</option>
+        }
+    </select>
+    <button type="submit" class="btn btn-secondary">Show</button>
+</form>
+
+<table class="table table-striped">
+    <thead class="thead-dark">
+        <tr>
+            <th>
+                Name
+            </th>
+            <th>
+                Price
+            </th>
+            <th>
+                Category
+            </th>
+            <th>
+                Photo
+            </th>
+            <th></th>
+            @if (!User.IsInRole("Admin"))
+            {
+                <th></th>
+            }
+        </tr>
+    </thead>
+    <tbody id="shopTable">
+        @foreach (var item in Model.Articles.Take(5))
+        {
+            <tr>
+                <td class="align-middle">
+                    @Html.DisplayFor(modelItem => item.Name)
+                    <p hidden>@item.ArticleId</p>
+                </td>
+                <td class="align-middle">
+                    @Html.DisplayFor(modelItem => item.Price)
+                </td>
+                <td class="align-middle">
+                    @Html.DisplayFor(modelItem => item.Category.Name)
+                </td>
+                <td class="align-middle">
+                    @if (item.FileName == "default-product.jpg")
+                    {
+                        <img src="/image/default-product.jpg" width="50px" />
+                    }
+                    else
+                    {
+                        <img src="/upload/@Html.DisplayFor(modelItem => item.FileName)" width="50px" />
+                    }
+                </td>
+                <td class="align-middle">
+                    <a asp-action="Details" asp-route-id="@item.ArticleId">Details</a>
+                </td>
+                @if (!User.IsInRole("Admin"))
+                {
+                    <td class="align-middle">
+                        @Html.ActionLink("Add to cart", "AddToCart", "Shop", new { id = item.ArticleId, catId = ViewBag.Cat }, new { @class = "btn btn-outline-primary", id = "add_to_cart" })
+                    </td>
+                }
+            </tr>
+        }
+    </tbody>
+</table>
+
+<button class="btn btn-outline-secondary d-block m-auto" onclick="jQNext()">Show next articles</button>
+
+
+
+@section Scripts{
+    <script>
+
+    function jQAjax(id) {
+        $.ajax({
+            type: "GET",
+            url: "/api/article/next/" + id + "/" + @ViewBag.Cat,
+            success: function (art, textStatus, jqXHR) {  // codes 200..299
+                if (jqXHR.status === 204) { // 204 No Content, so NULL
+                    window.alert("No element");
+                    return;
+                }
+                console.log(art);
+                $.each(art, function (index, value) {
+                    insertRow(value.articleId, value.name, value.price, value.category.name, value.fileName);
+                });
+                //insertRow(art.articleId, art.name, art.price);
+            }
+        })
+        .fail(function (jqXHR, textStatus) { // codes 400..499
+            console.warn("Recived " + jqXHR.status + " in response code.");
+        });
+
+    }
+
+    function insertRow(id, name, price, category, filename) {
+        var content = "<tr>";
+        content += "<td>" + name + "<p hidden>" + id + "</p></td>";
+        content += "<td>" + price + "</td>";
+        content += "<td>" + category + "</td>";
+        if (filename == "default-product.jpg") content += '<td><img src="/image/default-product.jpg" width="50px"/></td>';
+        else content += '<td><img src="/upload/' + filename + '" width="50px"/></td>';
+        content += '<td><a href="/Shop/Details/' + id + '">Details</a></td>';
+        if (@isAdmin == 0) content += '<td><a href="/Shop/AddToCart/' + id + '?catId=' +@ViewBag.Cat+'" class="btn btn-outline-primary">Add to cart</a></td>';
+        content += "</tr>";
+        $('#shopTable').append(content);
+    }
+
+
+    function jQNext() {
+        let id = $("td p").last().text();
+        jQAjax(id);
+    }
+
+    </script>
+}
+
+
